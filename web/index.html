@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevFlow AI - Developer Productivity Agent</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #30363f;
+            --bg-dark-alt: #4a535d;
+            --accent: #4ab3d6;
+            --light: #dfe4e7;
+            --bg-light: #dfe4e7;
+            --bg-lighter: #f3f5f6;
+            --bg-card: #eef1f3;
+            --text-primary: #222831;
+            --text-secondary: #444c55;
+            --text-muted: #7c848c;
+            --border: #c9d0d6;
+            --shadow: rgba(0,0,0,0.12);
+            --blue: #4ab3d6;
+            --blue-dark: #1e7a9b;
+            --blue-light: #9bd3e7;
+            --green: #63c4a6;
+            --green-light: #b7e5d6;
+            --yellow: #d8c76c;
+            --yellow-light: #f1e7b4;
+            --red: #d37a7a;
+            --red-light: #e9c1c1;
+            --orange: #e89a5d;
+            --orange-light: #f5d1b8;
+            --purple: #9b87d3;
+            --purple-light: #d4cbef;
+            --gray: #4a535d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            overflow-y: auto;
+            box-shadow: 2px 0 8px var(--shadow);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .status-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            border: 1px solid var(--border);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-online { background: var(--green); }
+        .status-offline { background: var(--red); }
+        .status-warning { background: var(--yellow); }
+
+        .quick-actions {
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .clear-btn {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+
+        .clear-btn:hover {
+            background: var(--border);
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 7rem;
+        }
+
+        .tab-btn {
+            padding: 1rem 1rem;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            border-radius: 50%;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-light);
+        }
+
+        .tab-btn.active {
+            color: var(--blue);
+            border-bottom-color: var(--blue);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            overflow-y: auto;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+            color: white;
+        }
+
+        .message.agent .message-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        .message-content h1, .message-content h2, .message-content h3 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .message-content h1 { font-size: 1.5rem; }
+        .message-content h2 { font-size: 1.25rem; }
+        .message-content h3 { font-size: 1.1rem; }
+
+        .message-content ul, .message-content ol {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .message-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .message-content p {
+            margin-bottom: 0.5rem;
+        }
+
+        .message-content code {
+            background: var(--bg-light);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message-content pre {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+
+        .message-content blockquote {
+            border-left: 4px solid var(--blue);
+            padding-left: 1rem;
+            margin: 0.5rem 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .message-content strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-success {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .badge-warning {
+            background: var(--yellow-light);
+            color: var(--yellow);
+        }
+
+        .badge-error {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .badge-info {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .message.agent.success .message-content {
+            border-left: 4px solid var(--green);
+        }
+
+        .message.agent.warning .message-content {
+            border-left: 4px solid var(--yellow);
+        }
+
+        .message.agent.error .message-content {
+            border-left: 4px solid var(--red);
+        }
+
+        .message.agent.info .message-content {
+            border-left: 4px solid var(--blue);
+        }
+
+        .processing {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--blue);
+            animation: pulse 1.4s infinite;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0%, 60%, 100% { opacity: 0.3; transform: scale(1); }
+            30% { opacity: 1; transform: scale(1.3); }
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -2px 8px var(--shadow);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1rem;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            resize: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px var(--blue-light);
+        }
+
+        .send-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow: auto;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-view {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .content-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--blue);
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .content-text {
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .github-section {
+            margin-bottom: 2rem;
+        }
+
+        .github-item {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--blue);
+            box-shadow: 0 1px 4px var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .github-item:hover {
+            box-shadow: 0 4px 12px var(--shadow);
+            transform: translateX(4px);
+        }
+
+        .github-item.priority-critical {
+            border-left-color: var(--red);
+        }
+
+        .github-item.priority-high {
+            border-left-color: var(--orange);
+        }
+
+        .github-item.priority-medium {
+            border-left-color: var(--yellow);
+        }
+
+        .github-item.priority-low {
+            border-left-color: var(--green);
+        }
+
+        .item-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .priority-badge {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .item-title {
+            flex: 1;
+        }
+
+        .item-title a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .item-title a:hover {
+            color: var(--blue);
+            text-decoration: underline;
+        }
+
+        .item-number {
+            color: var(--text-muted);
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+
+        .item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .item-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .item-labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .label {
+            background: var(--blue);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .label.label-bug {
+            background: var(--red);
+        }
+
+        .label.label-enhancement {
+            background: var(--green);
+        }
+
+        .label.label-documentation {
+            background: var(--purple);
+        }
+
+        .repo-group {
+            margin-bottom: 2rem;
+        }
+
+        .repo-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .repo-icon {
+            color: var(--blue);
+        }
+
+        .pr-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--blue-light);
+            color: var(--blue-dark);
+        }
+
+        .pr-status.draft {
+            background: var(--gray);
+            color: white;
+        }
+
+        .pr-status.merged {
+            background: var(--purple);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--blue);
+        }
+
+        .filter-btn.active {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+        }
+
+        .debug-section {
+            margin-bottom: 2rem;
+        }
+
+        .debug-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .debug-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .debug-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .debug-card-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .debug-card-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-width: 280px;
+                position: fixed;
+                left: -280px;
+                z-index: 1000;
+                transition: left 0.3s;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .chat-container {
+                padding: 1rem;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="logo">
+                <i class="bi bi-lightning-charge-fill"></i>
+                DevFlow AI
+            </div>
+            <div class="subtitle">Developer Productivity Agent</div>
+
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-dot status-online" id="ollama-status"></div>
+                    <span>Ollama</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot status-warning" id="google-status"></div>
+                    <span>Google APIs</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot status-warning" id="github-status"></div>
+                    <span>GitHub</span>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <div class="section-title"><i class="bi bi-lightning-fill"></i> Quick Actions</div>
+                <button class="action-btn" onclick="quickAction('Plan my day')">
+                    <i class="bi bi-calendar-check"></i> Plan Day
+                </button>
+                <button class="action-btn" onclick="quickAction('Show my pending tasks')">
+                    <i class="bi bi-list-check"></i> Show Tasks
+                </button>
+                <button class="action-btn" onclick="quickAction('Show my GitHub issues')">
+                    <i class="bi bi-github"></i> GitHub Issues
+                </button>
+                <button class="action-btn" onclick="quickAction('Show my calendar for today')">
+                    <i class="bi bi-calendar-day"></i> Today's Schedule
+                </button>
+                <button class="action-btn" onclick="quickAction('Create a new task for me')">
+                    <i class="bi bi-plus-circle"></i> New Task
+                </button>
+                <button class="action-btn" onclick="quickAction('When am I free this afternoon?')">
+                    <i class="bi bi-search"></i> Free Time
+                </button>
+                <button class="action-btn" onclick="quickAction('Schedule a meeting tomorrow')">
+                    <i class="bi bi-calendar-plus"></i> Schedule Meeting
+                </button>
+                <button class="action-btn" onclick="quickAction('Help me prioritize my tasks')">
+                    <i class="bi bi-arrow-up-circle"></i> Prioritize Tasks
+                </button>
+                <button class="action-btn" onclick="quickAction('How am I doing today?')">
+                    <i class="bi bi-graph-up"></i> Workload
+                </button>
+                <button class="action-btn" onclick="quickAction('Perform self-reflection')">
+                    <i class="bi bi-arrow-repeat"></i> Reflect
+                </button>
+                
+                <button class="action-btn clear-btn" onclick="clearChat()">
+                    <i class="bi bi-trash"></i> Clear Chat
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="chat" onclick="switchTab('chat')">
+                        <i class="bi bi-chat-dots"></i>
+                    </button>
+                    <button class="tab-btn" data-tab="tasks" onclick="switchTab('tasks')">
+                        <i class="bi bi-list-check"></i>
+                    </button>
+                    <button class="tab-btn" data-tab="calendar" onclick="switchTab('calendar')">
+                        <i class="bi bi-calendar3"></i>
+                    </button>
+                    <button class="tab-btn" data-tab="github" onclick="switchTab('github')">
+                        <i class="bi bi-github"></i>
+                    </button>
+                    <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard')">
+                        <i class="bi bi-graph-up"></i>
+                    </button>
+                    <button class="tab-btn" data-tab="debug" onclick="switchTab('debug')">
+                        <i class="bi bi-gear"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-content active" id="chat-tab">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="bi bi-chat-left-text"></i>
+                            </div>
+                            <p>Start a conversation or use quick actions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <textarea 
+                        class="chat-input" 
+                        id="chat-input" 
+                        placeholder="Message DevFlow AI..."
+                        rows="1"
+                        onkeydown="handleKeyPress(event)"
+                    ></textarea>
+                    <button class="send-btn" onclick="sendMessage()" id="send-btn">
+                        <i class="bi bi-send-fill"></i> Send
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tasks-tab">
+                <div class="content-view">
+                    <div class="content-header">
+                        <h2 class="content-title">
+                            <i class="bi bi-list-check"></i> Tasks
+                        </h2>
+                        <button class="action-btn" onclick="refreshTasks()" style="width: auto;">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="metrics-grid" id="task-metrics"></div>
+                    <div class="content-card">
+                        <div class="content-text" id="tasks-content">Loading tasks...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="calendar-tab">
+                <div class="content-view">
+                    <div class="content-header">
+                        <h2 class="content-title">
+                            <i class="bi bi-calendar3"></i> Calendar
+                        </h2>
+                        <button class="action-btn" onclick="refreshCalendar()" style="width: auto;">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="content-card">
+                        <div class="content-text" id="calendar-content">Loading calendar...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="github-tab">
+                <div class="content-view">
+                    <div class="content-header">
+                        <h2 class="content-title">
+                            <i class="bi bi-github"></i> GitHub
+                        </h2>
+                        <button class="action-btn" onclick="refreshGitHub()" style="width: auto;">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="metrics-grid" id="github-metrics">
+                        <div class="metric-card">
+                            <div class="metric-label">Assigned Issues</div>
+                            <div class="metric-value" id="github-issues-count">-</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Open PRs</div>
+                            <div class="metric-value" id="github-prs-count">-</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Estimated Hours</div>
+                            <div class="metric-value" id="github-hours">-</div>
+                        </div>
+                    </div>
+
+                    <div class="filter-bar">
+                        <button class="filter-btn active" onclick="filterGitHub('all')">All</button>
+                        <button class="filter-btn" onclick="filterGitHub('issues')">Issues Only</button>
+                        <button class="filter-btn" onclick="filterGitHub('prs')">PRs Only</button>
+                        <button class="filter-btn" onclick="filterGitHub('critical')">Critical</button>
+                    </div>
+
+                    <div id="github-content">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="bi bi-github"></i>
+                            </div>
+                            <p>Loading GitHub data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="dashboard-tab">
+                <div class="content-view">
+                    <h2 class="content-title">
+                        <i class="bi bi-graph-up"></i> Dashboard
+                    </h2>
+                    <div class="metrics-grid" id="dashboard-metrics"></div>
+                    <div class="content-card">
+                        <h3 style="margin-bottom: 1rem;">Workload Analysis</h3>
+                        <div class="content-text" id="workload-content">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="debug-tab">
+                <div class="content-view">
+                    <h2 class="content-title">
+                        <i class="bi bi-gear"></i> Debug Information
+                    </h2>
+                    
+                    <div class="debug-section">
+                        <h3><i class="bi bi-info-circle"></i> System Status</h3>
+                        <div class="debug-grid">
+                            <div class="debug-card">
+                                <div class="debug-card-title">API Connection</div>
+                                <div class="debug-card-value" id="debug-api-status">Checking...</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">Ollama Service</div>
+                                <div class="debug-card-value" id="debug-ollama">Checking...</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">Google Auth</div>
+                                <div class="debug-card-value" id="debug-google">Checking...</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">GitHub Auth</div>
+                                <div class="debug-card-value" id="debug-github">Checking...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="debug-section">
+                        <h3><i class="bi bi-chat-square-text"></i> Conversation State</h3>
+                        <div class="content-card">
+                            <div class="content-text" id="debug-conversation">No conversation state</div>
+                        </div>
+                    </div>
+
+                    <div class="debug-section">
+                        <h3><i class="bi bi-file-code"></i> Data Cache</h3>
+                        <div class="debug-grid">
+                            <div class="debug-card">
+                                <div class="debug-card-title">GitHub Data</div>
+                                <div class="debug-card-value" id="debug-github-cache">Not loaded</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">Current Filter</div>
+                                <div class="debug-card-value" id="debug-filter">all</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">Processing State</div>
+                                <div class="debug-card-value" id="debug-processing">Idle</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">Last Update</div>
+                                <div class="debug-card-value" id="debug-timestamp">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="debug-section">
+                        <h3><i class="bi bi-speedometer2"></i> Performance</h3>
+                        <div class="debug-grid">
+                            <div class="debug-card">
+                                <div class="debug-card-title">Page Load Time</div>
+                                <div class="debug-card-value" id="debug-load-time">-</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">API Latency</div>
+                                <div class="debug-card-value" id="debug-latency">-</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">Memory Usage</div>
+                                <div class="debug-card-value" id="debug-memory">-</div>
+                            </div>
+                            <div class="debug-card">
+                                <div class="debug-card-title">Active Tab</div>
+                                <div class="debug-card-value" id="debug-active-tab">chat</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="debug-section">
+                        <h3><i class="bi bi-terminal"></i> Environment</h3>
+                        <div class="content-card">
+                            <div class="content-text" id="debug-env">Loading environment info...</div>
+                        </div>
+                    </div>
+
+                    <div class="debug-section">
+                        <h3><i class="bi bi-arrow-clockwise"></i> Actions</h3>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="action-btn" onclick="refreshDebug()" style="width: auto;">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh Debug Info
+                            </button>
+                            <button class="action-btn" onclick="clearAllCache()" style="width: auto; background: var(--red);">
+                                <i class="bi bi-trash"></i> Clear All Cache
+                            </button>
+                            <button class="action-btn" onclick="testAllEndpoints()" style="width: auto; background: var(--green);">
+                                <i class="bi bi-check-circle"></i> Test All Endpoints
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+
+        let conversationState = null;
+        let processing = false;
+        let currentGitHubFilter = 'all';
+        let githubData = null;
+        let pageLoadTime = Date.now();
+        let lastApiCall = null;
+
+        const API_URL = 'http://localhost:8000';
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            // Update debug info
+            document.getElementById('debug-active-tab').textContent = tabName;
+
+            if (tabName === 'tasks') refreshTasks();
+            if (tabName === 'calendar') refreshCalendar();
+            if (tabName === 'github') refreshGitHub();
+            if (tabName === 'dashboard') refreshDashboard();
+            if (tabName === 'debug') refreshDebug();
+        }
+
+        function quickAction(message) {
+            document.getElementById('chat-input').value = message;
+            sendMessage();
+            switchTab('chat');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message || processing) return;
+
+            addMessage('user', message);
+            input.value = '';
+            processing = true;
+            document.getElementById('send-btn').disabled = true;
+            document.getElementById('debug-processing').textContent = 'Processing...';
+
+            showProcessing();
+
+            const startTime = Date.now();
+
+            try {
+                const response = await fetch(`${API_URL}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        state: conversationState
+                    })
+                });
+
+                const data = await response.json();
+                lastApiCall = Date.now() - startTime;
+                document.getElementById('debug-latency').textContent = `${lastApiCall}ms`;
+                
+                hideProcessing();
+                addMessage('agent', data.response, data.classification);
+                conversationState = data.state;
+
+            } catch (error) {
+                hideProcessing();
+                addMessage('agent', `❌ **Error**: ${error.message}`, 'error');
+                console.error('Chat error:', error);
+            } finally {
+                processing = false;
+                document.getElementById('send-btn').disabled = false;
+                document.getElementById('debug-processing').textContent = 'Idle';
+                updateDebugTimestamp();
+            }
+        }
+
+        function addMessage(role, content, classification = 'info') {
+            const messagesDiv = document.getElementById('chat-messages');
+            
+            const emptyState = messagesDiv.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            if (role === 'agent' && classification !== 'info') {
+                messageDiv.classList.add(classification);
+            }
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (role === 'agent' && classification !== 'info') {
+                const badge = document.createElement('span');
+                badge.className = `badge badge-${classification}`;
+                const emoji = {
+                    'success': '✅',
+                    'warning': '⚠️',
+                    'error': '❌',
+                    'info': 'ℹ️'
+                };
+                badge.textContent = `${emoji[classification]} ${classification.toUpperCase()}`;
+                contentDiv.appendChild(badge);
+                contentDiv.appendChild(document.createElement('br'));
+            }
+            
+            if (role === 'agent') {
+                const htmlContent = marked.parse(content);
+                contentDiv.innerHTML += htmlContent;
+            } else {
+                contentDiv.textContent = content;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            messagesDiv.appendChild(messageDiv);
+
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function showProcessing() {
+            const messagesDiv = document.getElementById('chat-messages');
+            const processingDiv = document.createElement('div');
+            processingDiv.className = 'processing';
+            processingDiv.id = 'processing-indicator';
+            processingDiv.innerHTML = `
+                <span>Processing</span>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            `;
+            messagesDiv.appendChild(processingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function hideProcessing() {
+            const indicator = document.getElementById('processing-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        function clearChat() {
+            const messagesDiv = document.getElementById('chat-messages');
+            messagesDiv.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-chat-left-text"></i>
+                    </div>
+                    <p>Start a conversation or use quick actions</p>
+                </div>
+            `;
+            conversationState = null;
+            updateDebugTimestamp();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function refreshTasks() {
+            document.getElementById('tasks-content').textContent = 'Loading...';
+            try {
+                const response = await fetch(`${API_URL}/tasks`);
+                const data = await response.json();
+                document.getElementById('tasks-content').textContent = data.content;
+                
+                const metricsDiv = document.getElementById('task-metrics');
+                metricsDiv.innerHTML = `
+                    <div class="metric-card">
+                        <div class="metric-label">Total</div>
+                        <div class="metric-value">${data.total || 0}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Pending</div>
+                        <div class="metric-value">${data.pending || 0}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Completed</div>
+                        <div class="metric-value">${data.completed || 0}</div>
+                    </div>
+                `;
+                updateDebugTimestamp();
+            } catch (error) {
+                document.getElementById('tasks-content').textContent = `Error: ${error.message}`;
+                console.error('Tasks error:', error);
+            }
+        }
+
+        async function refreshCalendar() {
+            document.getElementById('calendar-content').textContent = 'Loading...';
+            try {
+                const response = await fetch(`${API_URL}/calendar`);
+                const data = await response.json();
+                document.getElementById('calendar-content').textContent = data.content;
+                updateDebugTimestamp();
+            } catch (error) {
+                document.getElementById('calendar-content').textContent = `Error: ${error.message}`;
+                console.error('Calendar error:', error);
+            }
+        }
+
+        async function refreshGitHub() {
+            console.log('Refreshing GitHub data...');
+            
+            // Show loading state
+            document.getElementById('github-content').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-github"></i>
+                    </div>
+                    <p>Loading GitHub data...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_URL}/github`);
+                console.log('GitHub response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('GitHub data received:', data);
+                
+                githubData = data;
+                
+                // Update metrics
+                document.getElementById('github-issues-count').textContent = data.issues?.length || 0;
+                document.getElementById('github-prs-count').textContent = data.prs?.length || 0;
+                document.getElementById('github-hours').textContent = `${data.estimatedHours}h`;
+                
+                // Update debug info
+                document.getElementById('debug-github-cache').textContent = 
+                    `${data.issues?.length || 0} issues, ${data.prs?.length || 0} PRs`;
+                
+                renderGitHubContent();
+                updateDebugTimestamp();
+            } catch (error) {
+                console.error('GitHub error:', error);
+                document.getElementById('github-content').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <p>Error loading GitHub data: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function filterGitHub(filter) {
+            currentGitHubFilter = filter;
+            document.getElementById('debug-filter').textContent = filter;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderGitHubContent();
+        }
+
+        function renderGitHubContent() {
+            if (!githubData) {
+                console.log('No GitHub data to render');
+                return;
+            }
+
+            const contentDiv = document.getElementById('github-content');
+            let html = '';
+
+            const items = [];
+            
+            if (currentGitHubFilter === 'all' || currentGitHubFilter === 'issues') {
+                (githubData.issues || []).forEach(issue => {
+                    items.push({ type: 'issue', data: issue });
+                });
+            }
+            
+            if (currentGitHubFilter === 'all' || currentGitHubFilter === 'prs') {
+                (githubData.prs || []).forEach(pr => {
+                    items.push({ type: 'pr', data: pr });
+                });
+            }
+
+            let filteredItems = items;
+            if (currentGitHubFilter === 'critical') {
+                filteredItems = items.filter(item => item.data.priority === 'critical');
+            }
+
+            if (filteredItems.length === 0) {
+                contentDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <p>No items found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const groupedByRepo = {};
+            filteredItems.forEach(item => {
+                const repo = item.data.repo || 'Unknown';
+                if (!groupedByRepo[repo]) {
+                    groupedByRepo[repo] = [];
+                }
+                groupedByRepo[repo].push(item);
+            });
+
+            Object.keys(groupedByRepo).forEach(repo => {
+                html += `
+                    <div class="repo-group">
+                        <div class="repo-header">
+                            <i class="bi bi-book repo-icon"></i>
+                            ${repo}
+                        </div>
+                `;
+
+                groupedByRepo[repo].forEach(item => {
+                    const data = item.data;
+                    const priorityClass = `priority-${data.priority || 'low'}`;
+                    const priorityEmoji = {
+                        'critical': '🔴',
+                        'high': '🟠',
+                        'medium': '🟡',
+                        'low': '🟢'
+                    }[data.priority || 'low'];
+
+                    html += `
+                        <div class="github-item ${priorityClass}">
+                            <div class="item-header">
+                                <span class="priority-badge">${priorityEmoji}</span>
+                                <div class="item-title">
+                                    <a href="${data.url || '#'}" target="_blank">
+                                        ${data.title}
+                                        <span class="item-number">#${data.number}</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="item-meta">
+                                ${item.type === 'pr' ? `
+                                    <span class="pr-status ${data.status || ''}">
+                                        <i class="bi bi-git"></i> ${data.status || 'Open'}
+                                    </span>
+                                ` : ''}
+                                <span class="item-meta-item">
+                                    <i class="bi bi-calendar"></i>
+                                    ${data.created || 'Unknown date'}
+                                </span>
+                                ${data.assignee ? `
+                                    <span class="item-meta-item">
+                                        <i class="bi bi-person"></i>
+                                        ${data.assignee}
+                                    </span>
+                                ` : ''}
+                                ${data.estimate ? `
+                                    <span class="item-meta-item">
+                                        <i class="bi bi-clock"></i>
+                                        ${data.estimate}h
+                                    </span>
+                                ` : ''}
+                            </div>
+                            ${data.labels && data.labels.length > 0 ? `
+                                <div class="item-labels">
+                                    ${data.labels.map(label => `
+                                        <span class="label label-${label.toLowerCase()}">${label}</span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            });
+
+            contentDiv.innerHTML = html;
+        }
+
+        async function refreshDashboard() {
+            console.log('Refreshing dashboard...');
+            const metricsDiv = document.getElementById('dashboard-metrics');
+            const workloadDiv = document.getElementById('workload-content');
+            
+            metricsDiv.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-label">Tasks Today</div>
+                    <div class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Meetings</div>
+                    <div class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">GitHub Items</div>
+                    <div class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Productivity Score</div>
+                    <div class="metric-value">-</div>
+                </div>
+            `;
+            
+            workloadDiv.textContent = 'Loading workload analysis...';
+            
+            try {
+                const response = await fetch(`${API_URL}/dashboard`);
+                console.log('Dashboard response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Dashboard data received:', data);
+                
+                if (data.metrics) {
+                    metricsDiv.innerHTML = `
+                        <div class="metric-card">
+                            <div class="metric-label">Tasks Today</div>
+                            <div class="metric-value">${data.metrics.tasksToday || 0}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Meetings</div>
+                            <div class="metric-value">${data.metrics.meetings || 0}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">GitHub Items</div>
+                            <div class="metric-value">${data.metrics.githubItems || 0}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Productivity Score</div>
+                            <div class="metric-value">${data.metrics.productivityScore || '-'}</div>
+                        </div>
+                    `;
+                }
+                
+                workloadDiv.textContent = data.workloadAnalysis || 'No workload data available';
+                updateDebugTimestamp();
+            } catch (error) {
+                console.error('Dashboard error:', error);
+                workloadDiv.textContent = `Error loading dashboard: ${error.message}`;
+            }
+        }
+
+        async function refreshDebug() {
+            console.log('Refreshing debug info...');
+            
+            // Update timestamp
+            const elapsed = Math.floor((Date.now() - pageLoadTime) / 1000);
+            document.getElementById('debug-load-time').textContent = `${elapsed}s ago`;
+            
+            // Update memory
+            if (performance.memory) {
+                const memMB = (performance.memory.usedJSHeapSize / 1048576).toFixed(2);
+                document.getElementById('debug-memory').textContent = `${memMB} MB`;
+            } else {
+                document.getElementById('debug-memory').textContent = 'N/A';
+            }
+            
+            // Update conversation state
+            if (conversationState) {
+                document.getElementById('debug-conversation').textContent = 
+                    JSON.stringify(conversationState, null, 2);
+            } else {
+                document.getElementById('debug-conversation').textContent = 'No conversation state';
+            }
+            
+            // Update environment
+            const envInfo = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                online: navigator.onLine,
+                cookiesEnabled: navigator.cookieEnabled,
+                screenResolution: `${screen.width}x${screen.height}`,
+                windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                apiUrl: API_URL,
+                timestamp: new Date().toISOString()
+            };
+            document.getElementById('debug-env').textContent = JSON.stringify(envInfo, null, 2);
+            
+            // Check system status
+            try {
+                const statusResponse = await fetch(`${API_URL}/status`);
+                const statusData = await statusResponse.json();
+                
+                document.getElementById('debug-api-status').textContent = '✅ Connected';
+                document.getElementById('debug-ollama').textContent = statusData.ollama ? '✅ Online' : '❌ Offline';
+                document.getElementById('debug-google').textContent = statusData.google ? '✅ Authenticated' : '⚠️ Not authenticated';
+                document.getElementById('debug-github').textContent = statusData.github ? '✅ Authenticated' : '⚠️ Not authenticated';
+            } catch (error) {
+                console.error('Status check failed:', error);
+                document.getElementById('debug-api-status').textContent = '❌ ' + error.message;
+            }
+        }
+
+        function updateDebugTimestamp() {
+            const now = new Date();
+            document.getElementById('debug-timestamp').textContent = now.toLocaleTimeString();
+        }
+
+        function clearAllCache() {
+            if (confirm('Clear all cached data? This will reset the conversation and reload the page.')) {
+                conversationState = null;
+                githubData = null;
+                localStorage.clear();
+                sessionStorage.clear();
+                location.reload();
+            }
+        }
+
+        async function testAllEndpoints() {
+            console.log('Testing all endpoints...');
+            const results = {};
+            
+            const endpoints = [
+                { name: 'Status', url: '/status' },
+                { name: 'Tasks', url: '/tasks' },
+                { name: 'Calendar', url: '/calendar' },
+                { name: 'GitHub', url: '/github' },
+                { name: 'Dashboard', url: '/dashboard' },
+                { name: 'Health', url: '/health' }
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const startTime = Date.now();
+                    const response = await fetch(`${API_URL}${endpoint.url}`);
+                    const latency = Date.now() - startTime;
+                    
+                    results[endpoint.name] = {
+                        status: response.status,
+                        ok: response.ok,
+                        latency: `${latency}ms`
+                    };
+                } catch (error) {
+                    results[endpoint.name] = {
+                        status: 'Error',
+                        ok: false,
+                        error: error.message
+                    };
+                }
+            }
+            
+            alert('Endpoint Test Results:\n\n' + JSON.stringify(results, null, 2));
+            console.log('Test results:', results);
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_URL}/status`);
+                const data = await response.json();
+                
+                const ollamaStatus = document.getElementById('ollama-status');
+                const googleStatus = document.getElementById('google-status');
+                const githubStatus = document.getElementById('github-status');
+                
+                ollamaStatus.className = `status-dot ${data.ollama ? 'status-online' : 'status-offline'}`;
+                googleStatus.className = `status-dot ${data.google ? 'status-online' : 'status-warning'}`;
+                githubStatus.className = `status-dot ${data.github ? 'status-online' : 'status-warning'}`;
+            } catch (error) {
+                console.error('Status check failed:', error);
+            }
+        }
+
+        // Initialize
+        console.log('DevFlow AI initialized');
+        checkStatus();
+        setInterval(checkStatus, 30000);
+        
+        // Set initial debug values
+        document.getElementById('debug-active-tab').textContent = 'chat';
+        document.getElementById('debug-processing').textContent = 'Idle';
+        updateDebugTimestamp();
+    </script>
+</body>
+</html>
