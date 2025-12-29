@@ -33,14 +33,14 @@ def get_my_assigned_issues() -> str:
         for i, issue in enumerate(issues):
             if i >= 15: break
             repo_name = issue.repository.full_name if issue.repository else "Unknown Repo"
-            results.append(f"🔴 **#{issue.number}** in {repo_name}: {issue.title}\n   - [View Issue]({issue.html_url})")
+            results.append(f" **#{issue.number}** in {repo_name}: {issue.title}\n   - [View Issue]({issue.html_url})")
             
         if not results:
-            return "✨ You have no open assigned issues on GitHub."
+            return " You have no open assigned issues on GitHub."
             
-        return "## 📌 Your Assigned Issues\n\n" + "\n".join(results)
+        return "##  Your Assigned Issues\n\n" + "\n".join(results)
     except Exception as e:
-        return f"❌ **GitHub Error**: {str(e)}"
+        return f" **GitHub Error**: {str(e)}"
 
 @tool
 def get_my_pull_requests() -> str:
@@ -61,11 +61,11 @@ def get_my_pull_requests() -> str:
             results.append(f"⏳ **#{pr.number}** in {repo_name}: {pr.title}\n   - [View PR]({pr.html_url})")
             
         if not results:
-            return "✨ You have no open pull requests."
+            return " You have no open pull requests."
             
-        return "## 🔀 Your Pull Requests\n\n" + "\n".join(results)
+        return "## Your Pull Requests\n\n" + "\n".join(results)
     except Exception as e:
-        return f"❌ **GitHub Error**: {str(e)}"
+        return f" **GitHub Error**: {str(e)}"
 
 @tool
 def list_repo_issues(repo_name: str, state: str = "open") -> str:
@@ -91,9 +91,9 @@ def list_repo_issues(repo_name: str, state: str = "open") -> str:
         if not results:
             return f"No {state} issues found in {repo_name}."
             
-        return f"### 🐛 Issues in {repo_name}\n\n" + "\n".join(results)
+        return f"### Issues in {repo_name}\n\n" + "\n".join(results)
     except Exception as e:
-        return f"❌ **Error**: {str(e)}"
+        return f" **Error**: {str(e)}"
 
 @tool
 def list_pull_requests(repo_name: str, state: str = "open") -> str:
@@ -116,9 +116,9 @@ def list_pull_requests(repo_name: str, state: str = "open") -> str:
         if not results:
             return f"No {state} PRs found in {repo_name}."
             
-        return f"### 🔀 Pull Requests in {repo_name}\n\n" + "\n".join(results)
+        return f"### Pull Requests in {repo_name}\n\n" + "\n".join(results)
     except Exception as e:
-        return f"❌ **Error**: {str(e)}"
+        return f"**Error**: {str(e)}"
 
 # Export list for LangGraph
 GITHUB_TOOLS = [

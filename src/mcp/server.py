@@ -184,7 +184,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             )
             return [TextContent(
                 type="text",
-                text=f"✅ Task created: #{task['id']} - {task['title']}"
+                text=f"Task created: #{task['id']} - {task['title']}"
             )]
         
         elif name == "list_dev_tasks":
@@ -209,11 +209,11 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             if task:
                 return [TextContent(
                     type="text",
-                    text=f"✅ Task #{task['id']} updated to: {arguments['status']}"
+                    text=f"Task #{task['id']} updated to: {arguments['status']}"
                 )]
             return [TextContent(
                 type="text",
-                text=f"❌ Task #{arguments['task_id']} not found"
+                text=f"Task #{arguments['task_id']} not found"
             )]
         
         elif name == "schedule_coding_session":
@@ -272,6 +272,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    print("🚀 DevFlow AI MCP Server starting...")
-    print("📡 Listening on stdio...")
+    print("DevFlow AI MCP Server starting...")
+    print("Listening on stdio...")
     asyncio.run(main())

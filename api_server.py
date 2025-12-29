@@ -1,7 +1,3 @@
-"""
-FastAPI Backend for DevFlow AI Web App
-Connects HTML/CSS/JS frontend to the LangGraph agent
-"""
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -24,9 +20,7 @@ from src.tools.google_tasks import get_task_statistics, list_tasks
 from src.tools.google_calendar import get_calendar_events
 from src.utils.observability import track_agent_call
 
-# ────────────────────────────────────────────── #
-# 🔥 Response classifier (NEW — integrated here)
-# ────────────────────────────────────────────── #
+
 def classify_response(text: str):
     t = text.lower()
 
@@ -41,7 +35,6 @@ def classify_response(text: str):
 
 app = FastAPI(title="DevFlow AI API")
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -50,7 +43,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Request/Response Models
 class ChatRequest(BaseModel):
     message: str
     state: Optional[Dict] = None
@@ -67,9 +59,6 @@ class StatusResponse(BaseModel):
     model: str
 
 
-# ────────────────────────────────────────────── #
-# System Health Checks
-# ────────────────────────────────────────────── #
 def check_ollama():
     try:
         base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
@@ -96,9 +85,6 @@ def check_google_auth():
         return False
 
 
-# ────────────────────────────────────────────── #
-# 🔥 NEW: GitHub parsing functions
-# ────────────────────────────────────────────── #
 def parse_github_issues(issues_text: str) -> List[Dict]:
     """Parse GitHub issues from markdown text"""
     issues = []
@@ -245,10 +231,6 @@ def parse_github_prs(prs_text: str) -> List[Dict]:
     return prs
 
 
-# ────────────────────────────────────────────── #
-# API ROUTES
-# ────────────────────────────────────────────── #
-
 @app.get("/")
 async def root():
     html_path = Path(__file__).parent / "index.html"
@@ -267,16 +249,13 @@ async def get_status() -> StatusResponse:
     )
 
 
-# ────────────────────────────────────────────── #
-# 🔥 MAIN CHAT ENDPOINT — classifier integrated
-# ────────────────────────────────────────────── #
 @app.post("/chat")
 async def chat(request: ChatRequest) -> ChatResponse:
     try:
         result = run_agent(request.message, request.state, include_analysis=True)
 
         response_content = result["messages"][-1].content
-        classification = classify_response(response_content)   # ← NEW
+        classification = classify_response(response_content)   
 
         try:
             track_agent_call(request.message, response_content, result.get("tool_calls", []))
@@ -329,11 +308,6 @@ async def get_workload():
 
 @app.get("/github")
 async def get_github_summary(repo: str = None):
-    """
-    🔥 Enhanced GitHub endpoint with parsed data
-    If repo is provided, gets issues/PRs for that specific repo
-    Otherwise, gets all assigned issues and PRs for the authenticated user
-    """
     try:
         if repo:
             # Get specific repo data
@@ -368,10 +342,7 @@ async def get_github_summary(repo: str = None):
 
 @app.get("/dashboard")
 async def get_dashboard():
-    """
-    🔥 Dashboard endpoint with comprehensive metrics
-    Aggregates data from Tasks, Calendar, and GitHub
-    """
+
     try:
         # Get tasks data
         try:
@@ -479,10 +450,6 @@ async def get_dashboard():
 async def health_check():
     return {"status": "healthy", "ollama": check_ollama(), "google": check_google_auth()}
 
-
-# ────────────────────────────────────────────── #
-# Run server
-# ────────────────────────────────────────────── #
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

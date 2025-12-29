@@ -1,7 +1,7 @@
 """
-LangGraph Agent for DevFlow AI - Enhanced Ollama Version
-With markdown output formatting, effort analysis, and GitHub integration
+LangGraph Agent
 """
+
 from typing import Literal, Dict, Tuple
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
@@ -21,7 +21,6 @@ from src.tools.github_tools import get_my_assigned_issues, get_my_pull_requests
 
 load_dotenv()
 
-
 # Combine all tools
 ALL_TOOLS = CALENDAR_TOOLS + TASKS_TOOLS + REFLECTION_TOOLS + GITHUB_TOOLS
 
@@ -30,7 +29,7 @@ llm = ChatOllama(
     model=os.getenv("OLLAMA_MODEL", "llama3.1:8b"),
     base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
     temperature=0.4,
-    num_ctx=8192,
+    num_ctx=8192, # using max context for better tool handling
     repeat_penalty=1.1
 ).bind_tools(ALL_TOOLS)
 
@@ -46,7 +45,7 @@ def classify_output(response: str, tool_calls: list) -> str:
     # ERROR indicators
     error_patterns = [
         "error", "failed", "could not", "couldn't", "unable to",
-        "not found", "invalid", "incorrect", "❌", "cannot",
+        "not found", "invalid", "incorrect", "cannot",
         "exception", "crashed", "broken"
     ]
     
@@ -62,7 +61,7 @@ def classify_output(response: str, tool_calls: list) -> str:
     # WARNING indicators
     warning_patterns = [
         "blocked", "overdue", "high priority", "urgent", "pending",
-        "attention", "⚠️", "limited", "quota", "exceeded",
+        "attention", "limited", "quota", "exceeded",
         "missing", "incomplete"
     ]
     
@@ -73,8 +72,8 @@ def classify_output(response: str, tool_calls: list) -> str:
     
     # SUCCESS indicators
     success_patterns = [
-        "created", "scheduled", "completed", "updated", "deleted",
-        "✅", "successfully", "done", "finished", "saved",
+        "created", "scheduled", "completed", "updated", "deleted"
+        , "successfully", "done", "finished", "saved",
         "confirmed", "added"
     ]
     
@@ -87,14 +86,13 @@ def classify_output(response: str, tool_calls: list) -> str:
         if successful_tools:
             return "success"
     
-    # Default to INFO for neutral responses
     return "info"
 
 
 def should_include_effort_analysis(user_input: str) -> bool:
     """
-    Determine if user is explicitly asking for workload/effort analysis.
-    Only return True for explicit requests.
+    Determine if user is explicitly asking for workload analysis.
+    Only return True for explicit requests
     """
     explicit_keywords = [
         "how am i doing",
@@ -128,11 +126,11 @@ def get_github_comprehensive_summary() -> str:
         prs_content = prs_md.replace("## 🔀 Your Pull Requests", "")
 
         dashboard = [
-            "# 🖥️ GitHub Developer Dashboard",
+            "# GitHub Developer Dashboard",
             "---",
-            "### 🛠️ Issues Needing Attention",
+            "### Issues Needing Attention",
             issues_content if "✨" not in issues_md else "   - *No pending issues*",
-            "\n### 🔍 Active Pull Requests",
+            "\n### Active Pull Requests",
             prs_content if "✨" not in prs_md else "   - *No active PRs*",
             "\n---",
             f"**Last Updated**: {datetime.now().strftime('%H:%M:%S')}"
@@ -140,7 +138,7 @@ def get_github_comprehensive_summary() -> str:
         
         return "\n".join(dashboard)
     except Exception as e:
-        return f"❌ **Dashboard Error**: {str(e)}"
+        return f" **Dashboard Error**: {str(e)}"
 
 
 def get_github_workload() -> Dict[str, any]:
@@ -344,10 +342,10 @@ def calculate_schedule_effort(state: AgentState, include_github: bool = True) ->
             ]
         else:
             analysis["recommendations"] = [
-                "⚠️ Reschedule non-urgent tasks",
-                "⚠️ Consider delegating work",
-                "⚠️ Communicate workload to team",
-                "⚠️ Focus only on critical items"
+                "Reschedule non-urgent tasks",
+                "Consider delegating work",
+                "Communicate workload to team",
+                "Focus only on critical items"
             ]
         
         return {
@@ -394,7 +392,7 @@ def format_effort_report(effort_data: Dict) -> str:
     level = effort_data["effort_level"]
     emoji = effort_emoji.get(level, "⚪")
     
-    report = f"\n## 📊 Workload Analysis\n\n"
+    report = f"\n## Workload Analysis\n\n"
     report += f"{emoji} **Effort Level**: {level.upper()}\n\n"
     
     analysis = effort_data["analysis"]
@@ -641,7 +639,7 @@ def call_model(state: AgentState):
 
 ---
 
-## 🚀 INTELLIGENT WORKFLOWS
+## INTELLIGENT WORKFLOWS
 
 ### Daily Planning ("plan my day" / "what's on my schedule")
 Execute these steps in order:
@@ -653,17 +651,17 @@ Execute these steps in order:
 
 **Output format:**
 ```
-## 📅 Your Day - [Day, Date]
+## Your Day - [Day, Date]
 
-### 🗓️ Calendar ([X] events, [Y]h)
+### Calendar ([X] events, [Y]h)
 - **Event Name** - Time (duration)
 ...
 
-### ✅ Tasks ([X] pending, [Y]h estimated)
+### Tasks ([X] pending, [Y]h estimated)
 - Priority emoji **Task Title** (Est: Xh) [Due: date if applicable]
 ...
 
-### 💻 GitHub ([X] issues, [Y] PRs, [Z]h estimated)
+### GitHub ([X] issues, [Y] PRs, [Z]h estimated)
 #### Issues
 - Priority emoji **Repo/Title #number**
 ...
@@ -672,10 +670,10 @@ Execute these steps in order:
 - Status emoji **Repo/Title #number**
 ...
 
-### 📊 Workload Summary
+### Workload Summary
 **Total Estimated Hours**: [X]h
 **Utilization**: [Y]%
-**Effort Level**: 🟢/🟡/🟠/🔴
+**Effort Level**: Overloaded
 
 **Recommendations**:
 - Actionable suggestion 1
@@ -702,7 +700,7 @@ Execute these steps in order:
 
 ---
 
-## ✍️ RESPONSE FORMATTING STANDARDS
+## RESPONSE FORMATTING STANDARDS
 
 ### Markdown Best Practices
 - **Use headers** (##, ###) to organize information
@@ -713,23 +711,12 @@ Execute these steps in order:
 - **Tables** when comparing multiple items with similar attributes
 
 ### Emoji Usage (Use Sparingly)
-**Status Indicators Only:**
-- ✅ Success, completed, confirmed
-- ❌ Error, failed, cancelled
-- ⚠️ Warning, attention needed
-- 🔴 Critical priority / Blocker
-- 🟠 High priority / Important
-- 🟡 Medium priority / Normal
-- 🟢 Low priority / Minor
-- 🔵 Info / FYI
-- ⏳ In progress / Pending
-- 📝 Draft
-
+**Status Indicators**
 **Category Headers:**
-- 📅 Calendar/Schedule
-- ✅ Tasks
-- 💻 GitHub/Code
-- 📊 Analytics/Reports
+- Calendar/Schedule
+- Tasks
+- GitHub/Code
+- Analytics/Reports
 
 **Never use excessive emojis in body text.**
 
@@ -741,7 +728,7 @@ Execute these steps in order:
 
 ---
 
-## 🎓 CONVERSATION INTELLIGENCE
+## CONVERSATION INTELLIGENCE
 
 ### Memory & Context Awareness
 - **Reference previous interactions** when relevant
@@ -766,7 +753,7 @@ Execute these steps in order:
 
 ---
 
-## 🔧 TOOL EXECUTION RULES
+## TOOL EXECUTION RULES
 
 ### Critical Guidelines
 1. **ALWAYS call tools immediately** - Never say "I'll do X" without doing it
@@ -790,13 +777,13 @@ Before calling any tool:
 
 ---
 
-## 💡 RESPONSE EXAMPLES
+## RESPONSE EXAMPLES
 
 ### Example 1: Simple Task Creation
 **User**: "Remind me to review the API documentation tomorrow"
 
 **Your Response**:
-✅ **Task Created**
+**Task Created**
 
 **Review API documentation**
 - **Priority**: Medium
@@ -811,35 +798,35 @@ I've added this to your task list.
 **User**: "Plan my day"
 
 **Your Response**:
-## 📅 Your Day - Monday, December 30th
+## Your Day - Monday, December 30th
 
-### 🗓️ Calendar (3 events, 4.5h)
+### Calendar (3 events, 4.5h)
 - **Team Standup** - 9:00 AM - 9:30 AM (0.5h)
 - **Code Review Session** - 2:00 PM - 3:30 PM (1.5h)
 - **1-on-1 with Manager** - 4:00 PM - 6:30 PM (2.5h)
 
-### ✅ Tasks (4 pending, 8h estimated)
-- 🔴 **Fix authentication bug** (Est: 3h) - Due: Today
-- 🟠 **Deploy staging environment** (Est: 2h)
-- 🟡 **Update test coverage** (Est: 2h)
-- 🟢 **Code documentation** (Est: 1h)
+### Tasks (4 pending, 8h estimated)
+- **Fix authentication bug** (Est: 3h) - Due: Today
+- **Deploy staging environment** (Est: 2h)
+- **Update test coverage** (Est: 2h)
+- **Code documentation** (Est: 1h)
 
-### 💻 GitHub (3 issues, 2 PRs, 10h estimated)
+### GitHub (3 issues, 2 PRs, 10h estimated)
 #### Issues
-- 🔴 **myapp/backend: Database timeout #456**
-- 🟠 **myapp/frontend: UI responsiveness #457**
-- 🟡 **myapp/api: Rate limiting #458**
+- **myapp/backend: Database timeout #456**
+- **myapp/frontend: UI responsiveness #457**
+- **myapp/api: Rate limiting #458**
 
 #### Pull Requests
-- ⏳ **myapp/backend: Auth refactor #234** (Awaiting review)
-- 📝 **myapp/frontend: New dashboard #235** (Draft)
+- **myapp/backend: Auth refactor #234** (Awaiting review)
+- **myapp/frontend: New dashboard #235** (Draft)
 
-### 📊 Workload Summary
+### Workload Summary
 **Total Estimated Hours**: 22.5h
 **Utilization**: 281%
-**Effort Level**: 🔴 Overloaded
+**Effort Level**: Overloaded
 
-> ⚠️ **Warning**: Your workload significantly exceeds available hours.
+> **Warning**: Your workload significantly exceeds available hours.
 
 **Recommendations**:
 - Reschedule non-urgent tasks (code documentation, test coverage)
@@ -849,7 +836,7 @@ I've added this to your task list.
 
 ---
 
-## 🎯 PERSONALITY & TONE
+## PERSONALITY & TONE
 
 **Be:**
 - **Professional** but friendly
@@ -988,7 +975,7 @@ def run_agent(user_input: str, state: AgentState = None, include_analysis: bool 
         return result
         
     except Exception as e:
-        error_message = f"❌ **Error**: {str(e)}"
+        error_message = f" **Error**: {str(e)}"
         state["messages"].append(SystemMessage(content=error_message))
         
         if include_analysis:
