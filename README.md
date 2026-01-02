@@ -6,14 +6,14 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Langfuse Status](https://img.shields.io/badge/Langfuse-Connected-brightgreen)](https://cloud.langfuse.com)
 
-DevFlow AI is a productivity assistant designed to help software developers manage tasks, schedule work sessions, and optimize their workflow through natural language interaction and integrated tools. Built as a submission for the Amulate Hackathon 2025, It combines real-world APIs (Google Calendar, Google Tasks, Github) with an agentic reasoning engine to understand developer intent and automate planning, reflection, and execution workflows.
+DevFlow AI is a productivity assistant designed to help software developers manage tasks, schedule work sessions, and optimize their workflow through natural language interaction and integrated tools. It combines real-world APIs (Google Calendar, Google Tasks, Github) with an agentic reasoning engine to understand developer intent and automate planning, reflection, and execution workflows.
 
 
 
 
 ## Documentation
 
-See below for quickstart installation and usage examples. For comprehensive guidance on setting up and using DevFlow AI, refer to [GitHub Wiki](https://docs.ultralytics.com/).
+See below for quickstart installation and usage examples. For comprehensive guidance on setting up and using DevFlow AI,
 
 ### Prerequisites
 * **Python 3.10+** installed.
